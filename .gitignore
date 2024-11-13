@@ -1,0 +1,9 @@
+# Files to download separately
+*.nc
+toolbox_GrowthAdvection
+*OSCAR*
+
+# Other files
+*~
+*.DS_Store
+Thumbs.db
