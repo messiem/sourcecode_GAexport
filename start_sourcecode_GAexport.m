@@ -7,7 +7,7 @@
 %% --------------------------------------------- Set up GA toolbox ----------------------------------------------- %%
 
 % Download the GA toolbox from https://github.com/messiem/toolbox_GrowthAdvection into directory toolbox_GrowthAdvection.
-% The toolbox is only needed for using the plankton model (function ga_model_2P2Z_fromNsupply.m).
+% The toolbox is only needed for using the plankton model (function ga_model_2P2Z_fromNsupply.m). The version used in the paper is https://doi.org/10.5281/zenodo.14144599 
 % Trajectories were calculated using ga_advection_ariane and can be reproduced by downloading GlobCurrent 
 % from https://doi.org/10.48670/mds-00327 and following the toolbox instructions.
 
