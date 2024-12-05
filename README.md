@@ -41,9 +41,9 @@ backward Lagrangian trajectories originating from the CCE-LTER sediment trap pos
 
 ### Reference ###
 
-Please refer this paper when using these scripts (PDF available upon request):  
+Please refer this paper when using these scripts:  
 
-Messié, M., C.L. Huffard, M. Stukel, and H.A. Ruhl (2024). **Spatial and temporal interplay between oceanic circulation and biological production in shaping carbon export off the California coast**.  *Geophysical Research Letters*, submitted.
+Messié, M., C.L. Huffard, M. Stukel, and H.A. Ruhl (2024). **Spatial and temporal interplay between oceanic circulation and biological production in shaping carbon export off the California coast**.  *Geophysical Research Letters*, submitted. Preprint available at https://doi.org/10.22541/essoar.173272956.60470361/v1
 
 * * *
 
