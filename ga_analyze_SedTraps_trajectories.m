@@ -25,14 +25,15 @@ load('data/CCE_SedTrap_trajectories.mat','deployment','recovery')
 % Coastline
 load('data/coastline_California.mat','coast_x','coast_y')	
 
-% Coastal nitrate supply: download file https://data.mbari.org/products/satellite-derived/nitrate-supply/Nsupply_California_CCMP.nc and save in inputs/
-ncfile='data/Nsupply_California_CCMP.nc';
+% Coastal nitrate supply (downloaded from Zenodo, see start_sourcecode_GAexport.m)
+ncfile='data/Nsupply_California_CCMP_REP.nc';
 Nsupply=struct(); Nsupply.unit=struct();
 for varname={'latitude','time','Nsupply_coastal_pervolume'}, varname=varname{:};
 	Nsupply.(varname)=ncread(ncfile,varname);
 	Nsupply.unit.(varname)=ncreadatt(ncfile,varname,'units');
 end
 Nsupply.Nsupply_coastal_pervolume=Nsupply.Nsupply_coastal_pervolume';			% matlab's ncread transposes dimensions
+Nsupply.Nsupply_coastal_pervolume=movmean(Nsupply.Nsupply_coastal_pervolume,3,1,'omitnan');		% slight spatial smoothing to account for trajectory uncertainty
 Nsupply.time=days(Nsupply.time)+datetime(1970,1,1); Nsupply.unit.time='';		% moving to datetime format
 
 
@@ -221,13 +222,13 @@ SedTrap.distdrift_km = 6378*c;
 
 % Set up figure
 figure, set(gcf,'Units','Centimeters'); pos=get(gcf,'Position');
-pos(3)=18; pos(4)=6; set(gcf,'Position',pos)
+pos(3)=18; pos(4)=8; set(gcf,'Position',pos)
 set(gcf,'PaperPositionMode','Auto','PaperUnits','Centimeters','PaperSize',[pos(3), pos(4)])
-fontsize=8;
+fontsize=9;
 
 % Map (Fig. 1a)
 lonlim=[-128 -120]; latlim=[32 40.5];
-axes('Position',[0.02 0.06 0.28 0.93],'FontSize',fontsize-1), hold on
+axes('Position',[0.04 0.05 0.34 0.9],'FontSize',fontsize-1), hold on
 for ii=1:nb_pts
 	if ~isnan(deployment.water_age(ii)), plot(deployment.lon2D(ii,:),deployment.lat2D(ii,:),'Color',0.5*[1 1 1]), end
 	if ~isnan(recovery.water_age(ii)), plot(recovery.lon2D(ii,:),recovery.lat2D(ii,:),'Color',0.7*[1 1 1]), end
@@ -236,19 +237,25 @@ scatter(SedTrap.lon(iok),SedTrap.lat(iok),150-SedTrap.Zeu_m(iok),SedTrap.Carbon_
 plot(coast_x,coast_y,'k')
 xlim(lonlim), ylim(latlim), clim([0 600])
 hbar1=colorbar; hbar1.Title.String={'{\it In situ} Zeu export','[mgC m^{-2} d^{-1}]'};
-hbar1.Position=[0.24 0.58 0.01 0.3];
+hbar1.Position=[0.31 0.58 0.01 0.3];
 
 % Export vs water age and Nsupply (Fig. 1b)
-axes('Position',[0.37 0.6 0.25 0.34],'FontSize',fontsize-1), hold on
+axes('Position',[0.47 0.6 0.45 0.38],'FontSize',fontsize-1), hold on
 scatter(days(SedTrap.water_age(iok)),SedTrap.Carbon_flux_corr_mgm2day(iok),150-SedTrap.Zeu_m(iok),...
 	SedTrap.Nsupply_mmolCm3d(iok),'filled','MarkerEdgeColor','k')
+for ipts=find(iok)'
+	plot([days(SedTrap.water_age(ipts)) days(SedTrap.water_age(ipts))],...
+		[SedTrap.Carbon_flux_corr_mgm2day(ipts)-SedTrap.Carbon_flux_standard_error_corr_mgm2day(ipts)/2 ...
+		SedTrap.Carbon_flux_corr_mgm2day(ipts)+SedTrap.Carbon_flux_standard_error_corr_mgm2day(ipts)/2],...
+		'Color','k')
+end
 clim([0 50])
 xlabel('Water age (days)'), ylabel({'{\it In situ} export','[mg m^{-2} d^{-1}]'})
 hbar2=colorbar; hbar2.Title.String='mmolC m^{-3} d^{-1}'; ylabel(hbar2,'Nsupply','Rotation',-90,'FontSize',fontsize)
-hbar2.Position=[0.63 0.6 0.01 0.34];
+hbar2.Position=[0.94 0.6 0.01 0.34];
 
 % Model output (Fig. 1c)
-axes('Position',[0.37 0.12 0.25 0.34],'FontSize',fontsize-1), hold on
+axes('Position',[0.47 0.1 0.45 0.39],'FontSize',fontsize-1), hold on
 output=ga_model_2P2Z_fromNsupply(20,suff_krill{:},'nbdays_advec',90);
 h1=plot(output.time,output.P_big,'k--','LineWidth',3);
 h2=plot(output.time,output.Z_big,'k','LineWidth',3);
@@ -262,19 +269,32 @@ legend([h1,h2],{'P_{big}','Z_{big}'},'FontSize',fontsize-1)
 xlabel('Elapsed time (days)'), ylabel({'Model output',['[',output.units.P_big,']']})
 clim([min(list_Nsupply) max(list_Nsupply)])
 hbar3=colorbar; hbar3.Title.String='mmolC m^{-3} d^{-1}'; ylabel(hbar3,'Nsupply','Rotation',-90,'FontSize',fontsize)
-hbar3.Position=[0.63 0.12 0.01 0.34];
+hbar3.Position=[0.94 0.12 0.01 0.34];
+
+% Save the figure
+print('-djpeg','-r300','figures/Fig1.jpg')
+
 
 % Scatter plot (Fig. 2a)
-axes('Position',[0.75 0.27 0.24 0.7],'FontSize',fontsize-1), hold on
+figure, set(gcf,'Units','Centimeters'); pos=get(gcf,'Position');
+pos(3)=6; pos(4)=7; set(gcf,'Position',pos)
+axes('Position',[0.2 0.28 0.75 0.7],'FontSize',7), hold on
+for ipts=find(iok)'
+	plot([SedTrap.Carbon_flux_corr_mgm2day(ipts)-SedTrap.Carbon_flux_standard_error_corr_mgm2day(ipts)/2 ...
+		SedTrap.Carbon_flux_corr_mgm2day(ipts)+SedTrap.Carbon_flux_standard_error_corr_mgm2day(ipts)/2],...
+		[SedTrap.GAalongtraj_CZeu_mgCm2day(ipts) SedTrap.GAalongtraj_CZeu_mgCm2day(ipts)],...
+		'Color',[0.7 0.7 0.7])
+end
 scatter(SedTrap.Carbon_flux_corr_mgm2day(iok),SedTrap.GAalongtraj_CZeu_mgCm2day(iok),150-SedTrap.Zeu_m(iok),SedTrap.distdrift_km(iok),'filled','MarkerEdgeColor','w')
 scatter(SedTrap.Carbon_flux_corr_mgm2day(iok & ~ibelow30m),SedTrap.GAalongtraj_CZeu_mgCm2day(iok & ~ibelow30m),150,'k')
+set(gca,'Xlim',[0 900],'YLim',[0 900],'XTick',0:200:800,'YTick',0:200:800)
 plot(xlim,xlim,'k')
 xlabel({'{\it In situ} Zeu export [mg m^{-2} d^{-1}]'}), ylabel('Along-trajectory C_{Zeu} [mg m^{-2} d^{-1}]')
 hbar4=colorbar('SouthOutside'); hbar4.Title.String='Drift [km]';
-hbar4.Position=[0.75 0.06 0.19 0.03];
+hbar4.Position=[0.15 0.06 0.8 0.03];
 
 % Save the figure
-print('-djpeg','-r300','figures/results_alongtraj.jpg')
+print('-djpeg','-r300','figures/Fig2a.jpg')
 
 
 %%  ------------------------- (7) Reproducibility
@@ -282,6 +302,7 @@ print('-djpeg','-r300','figures/results_alongtraj.jpg')
 disp(' ')
 disp('Reproducibility:')
 disp('----------------')
+disp('(differences below 1e-5 are due to precision differences)')
 disp(['Max diff reproducing water_age: ',num2str(max(abs(days(SedTrap.water_age)-SedTrap_ini.water_age)))])
 disp(['Max diff reproducing Nsupply: ',num2str(max(abs(SedTrap.Nsupply_mmolCm3d-SedTrap_ini.Nsupply_mmolCm3d)))])
 disp(['Max diff reproducing alongtraj GA surface export: ',num2str(max(abs(SedTrap.GAalongtraj_Cproduction_mgCm3day-SedTrap_ini.GAalongtraj_Cproduction_mgCm3day)))])

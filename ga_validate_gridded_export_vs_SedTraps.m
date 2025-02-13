@@ -23,8 +23,8 @@ SedTrap.Recovery_Date = dateshift(SedTrap.Recovery_Datetime,'Start','Day');
 SedTrap.GAgridded_Cproduction_mgm3day = NaN(size(SedTrap,1),1);
 
 
-% Load 3D daily GA export: download file export_CCMP3km_GlobCurrent_daily_REP.nc and save in data/
-% Cproduction is already scaled in this file.
+% Load 3D daily GA export (downloaded from Zenodo, see start_sourcecode_GAexport.m)
+% Cproduction is already calibrated in this file.
 ncfile='data/export_CCMP3km_GlobCurrent_daily_REP.nc';
 GA=struct(); GA.unit=struct();
 for varname={'longitude','latitude','time','Cproduction'}, varname=varname{:};
@@ -53,12 +53,12 @@ for ipts=1:size(SedTrap,1)
 	ilat = GA.latitude>=lat_trap(1) & GA.latitude<=lat_trap(2);
 	if sum(ilat)==0
 		diff_lat = abs(GA.latitude-mean(lat_trap));
-		ilat = find( diff_lat==min(diff_lat) ); 
+		ilat = diff_lat==min(diff_lat); 
 	end
 	ilon = GA.longitude>=lon_trap(1) & GA.longitude<=lon_trap(2);
 	if sum(ilon)==0
 		diff_lon = abs(GA.longitude-mean(lon_trap));
-		ilon = find( diff_lon==min(diff_lon) ); 
+		ilon = diff_lon==min(diff_lon); 
 	end
 
 	% average the corresponding GA data points
@@ -128,26 +128,40 @@ disp(['R² in situ export / combined export = ',num2str(corr(1,2)^2,'%.2f'),' (N 
 
 % Reproduce Fig. 2b & 2c
 figure, set(gcf,'Units','Centimeters'); pos=get(gcf,'Position');
-	pos(3)=18; pos(4)=10; set(gcf,'Position',pos)
+	pos(3)=12; pos(4)=7; set(gcf,'Position',pos)
 	set(gcf,'PaperPositionMode','Auto','PaperUnits','Centimeters','PaperSize',[pos(3), pos(4)])
-axes('Position',[0.1 0.27 0.37 0.7]), hold on
+	fontsize=7;
+axes('Position',[0.1 0.27 0.37 0.7],'FontSize',fontsize), hold on
 	for ipts=find(iok)'
-		plot([1 1]*SedTrap.Carbon_flux_corr_mgm2day(ipts),[SedTrap.export_EFOC_mgm2day(ipts) SedTrap.GAgridded_CZeu_mgm2day(ipts)],'Color',[0.7 0.7 0.7])
+		plot([SedTrap.Carbon_flux_corr_mgm2day(ipts) SedTrap.Carbon_flux_corr_mgm2day(ipts)],...
+		[SedTrap.export_EFOC_mgm2day(ipts) SedTrap.GAgridded_CZeu_mgm2day(ipts)],'Color',[0.7 0.7 0.7])
 	end
-	h1=scatter(SedTrap.Carbon_flux_corr_mgm2day(iok),SedTrap.export_EFOC_mgm2day(iok),100,'r','filled','MarkerEdgeColor','w');
-	h2=scatter(SedTrap.Carbon_flux_corr_mgm2day(iok),SedTrap.GAgridded_CZeu_mgm2day(iok),100,'b','filled','MarkerEdgeColor','w');
+	h1=scatter(SedTrap.Carbon_flux_corr_mgm2day(iok),SedTrap.export_EFOC_mgm2day(iok),50,'r','filled','MarkerEdgeColor','w');
+	h2=scatter(SedTrap.Carbon_flux_corr_mgm2day(iok),SedTrap.GAgridded_CZeu_mgm2day(iok),50,'b','filled','MarkerEdgeColor','w');
+	set(gca,'Xlim',[0 900],'YLim',[0 900],'XTick',0:200:800,'YTick',0:200:800)
 	plot(xlim,xlim,'k')
 	xlabel({'{\it In situ} Zeu export [mg m^{-2} d^{-1}]'}), ylabel('Gridded export products [mg m^{-2} d^{-1}]')
-	legend([h1,h2],{'EF-OC','GA C_{Zeu}'},'FontSize',12)
-axes('Position',[0.6 0.27 0.37 0.7]), hold on
+	legend([h1,h2],{'EF-OC','GA C_{Zeu}'},'FontSize',fontsize,'Location','northwest')
+axes('Position',[0.6 0.27 0.37 0.7],'FontSize',fontsize), hold on
 	ibelow30m=SedTrap.Zeu_m>=30;
-	scatter(SedTrap.Carbon_flux_corr_mgm2day,SedTrap.export_combined_mgm2day,150-SedTrap.Zeu_m,SedTrap.distdrift_km,'filled','MarkerEdgeColor','w')
-	scatter(SedTrap.Carbon_flux_corr_mgm2day(~ibelow30m),SedTrap.export_combined_mgm2day(~ibelow30m),150,'k')
+	errSat=abs(SedTrap.export_EFOC_mgm2day*b(1)-SedTrap.GAgridded_CZeu_mgm2day*b(2))*sqrt(2);
+	for ipts=find(iok)'
+		plot([SedTrap.Carbon_flux_corr_mgm2day(ipts)-SedTrap.Carbon_flux_standard_error_corr_mgm2day(ipts)/2 ...
+			SedTrap.Carbon_flux_corr_mgm2day(ipts)+SedTrap.Carbon_flux_standard_error_corr_mgm2day(ipts)/2],...
+			[SedTrap.export_combined_mgm2day(ipts) SedTrap.export_combined_mgm2day(ipts)],...
+			'Color',[0.7 0.7 0.7])
+		plot([SedTrap.Carbon_flux_corr_mgm2day(ipts) SedTrap.Carbon_flux_corr_mgm2day(ipts)],...
+			[SedTrap.export_combined_mgm2day(ipts)-errSat(ipts)/2 SedTrap.export_combined_mgm2day(ipts)+errSat(ipts)/2],...
+			'Color',[0.7 0.7 0.7])
+	end
+	scatter(SedTrap.Carbon_flux_corr_mgm2day(iok),SedTrap.export_combined_mgm2day(iok),150-SedTrap.Zeu_m(iok),SedTrap.distdrift_km(iok),'filled','MarkerEdgeColor','w')
+	scatter(SedTrap.Carbon_flux_corr_mgm2day(iok & ~ibelow30m),SedTrap.export_combined_mgm2day(iok & ~ibelow30m),150,'k')
+	set(gca,'Xlim',[0 900],'YLim',[0 900],'XTick',0:200:800,'YTick',0:200:800)
 	plot(xlim,xlim,'k')
 	xlabel('{\it In situ} Zeu export [mgC m^{-2} d^{-1}]'), ylabel('Combined satellite export [mgC m^{-2} d^{-1}]')
 	hbar4=colorbar('SouthOutside'); hbar4.Title.String='Drift [km]';
 	hbar4.Position=[0.6 0.06 0.37 0.03];
-print('-djpeg','-r300','figures/results_gridded.jpg')
+print('-djpeg','-r300','figures/Fig2bc.jpg')
 
 
 
@@ -157,6 +171,7 @@ print('-djpeg','-r300','figures/results_gridded.jpg')
 disp(' ')
 disp('Reproducibility:')
 disp('----------------')
+disp('(differences below 1e-5 are due to precision differences)')
 disp(['Max diff reproducing GA POC production: ',num2str(max(abs(SedTrap.GAgridded_Cproduction_mgm3day-SedTrap_ini.GAgridded_Cproduction_mgm3day)))])
 disp(['Max diff reproducing GA Zeu export: ',num2str(max(abs(SedTrap.GAgridded_CZeu_mgm2day-SedTrap_ini.GAgridded_CZeu_mgm2day)))])
 
