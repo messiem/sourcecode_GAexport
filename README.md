@@ -1,6 +1,6 @@
 # sourcecode_GAexport
 
-This toolbox contains the programs used to reproduce results and figures from Messié et al. (submitted).   
+This toolbox contains the programs used to reproduce results and figures from Messié et al. (2025).   
 The programs are written for Matlab. The Statistics toolbox is required for multilinear regression in `ga_validate_gridded_export_vs_SedTraps` (l. 93).
 
 * * *
@@ -16,14 +16,14 @@ The code generates figures, saved in `figures/`, reproducing results from Fig. 1
 ### Description of functions ### 
 
 `ga_analyze_SedTraps_trajectories`: reproduces results using backward Lagrangian trajectories originating from the CCE-LTER sediment trap positions. Trajectories are available in `data/CCE_SedTrap_trajectories.mat`.  
-`ga_validate_gridded_export_vs_SedTraps`: reproduces the validation of the GA gridded product published on Zenodo, against the CCE-LTER dataset. The program also displays results using the EF-OC dataset (available online at https://spg-satdata.ucsd.edu/wc_productivity/wc_productivity.htm). 
+`ga_validate_gridded_export_vs_SedTraps`: reproduces the validation of the GA gridded product published on Zenodo (https://doi.org/10.5281/zenodo.14758969), against the CCE-LTER dataset. The program also displays results using the EF-OC satellite export dataset (available online at https://spg-satdata.ucsd.edu/wc_productivity/wc_productivity.htm). 
 
 ### Description of data ###
 
 **Data to download and save in the `data/` folder:** 
 
 `Nsupply_California_CCMP_REP.nc`: download from https://doi.org/10.5281/zenodo.14641977 (nutrient supply used to force the plankton model)   
-`export_CCMP3km_GlobCurrent_daily_REP.nc`: download from https://doi.org/10.5281/zenodo.14084208 (output of the GA model, forced by Nsupply and GlobCurrent).
+`export_CCMP3km_GlobCurrent_daily_REP.nc`: download from https://doi.org/10.5281/zenodo.14758969 (output of the GA model, forced by Nsupply and GlobCurrent).
 
 **CCE-LTER datasets:**  
 
@@ -43,7 +43,7 @@ backward Lagrangian trajectories originating from the CCE-LTER sediment trap pos
 
 Please refer this paper when using these scripts:  
 
-Messié, M., C.L. Huffard, M. Stukel, and H.A. Ruhl (2024). **Spatial and temporal interplay between oceanic circulation and biological production in shaping carbon export off the California coast**.  *Geophysical Research Letters*, submitted. Preprint available at https://doi.org/10.22541/essoar.173272956.60470361/v1
+Messié, M., C.L. Huffard, M. Stukel, and H.A. Ruhl (2025). **Spatial and temporal interplay between oceanic circulation and biological production in shaping carbon export off the California coast**.  *Geophysical Research Letters*, https://doi.org/10.1029/2024GL113707
 
 * * *
 

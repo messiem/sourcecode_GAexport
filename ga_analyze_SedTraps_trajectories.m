@@ -2,10 +2,13 @@ function ga_analyze_SedTraps_trajectories
 
 
 %% GA_ANALYZE_SEDTRAPS_TRAJECTORIES: look at sediment trap source water characteristics 
-% This function recalculates water_age, coastal Nsupply, and along-trajectory modeled export.
-% Outputs are compared against CCE_SedTrap_Data.csv (differences are due to precision in the csv file).
+% This function recalculates water_age, coastal Nsupply, and along-trajectory modeled export,
+% and reproduces Fig. 1 & 2a in Messié et al. (2025) as well as results from Table 1.
+% Outputs are compared against CCE_SedTrap_Data.csv.
 %
 % ga_analyze_SedTraps_trajectories
+%
+% Monique Messié, 2024
 
 
 distcoast_lim=10;		% distance to coast used as "source data". This is a trade-off between too far from the coast, and unreliable/no current data near shore.
@@ -278,7 +281,7 @@ print('-djpeg','-r300','figures/Fig1.jpg')
 % Scatter plot (Fig. 2a)
 figure, set(gcf,'Units','Centimeters'); pos=get(gcf,'Position');
 pos(3)=6; pos(4)=7; set(gcf,'Position',pos)
-axes('Position',[0.2 0.28 0.75 0.7],'FontSize',7), hold on
+axes('Position',[0.17 0.28 0.8 0.7],'FontSize',7), hold on
 for ipts=find(iok)'
 	plot([SedTrap.Carbon_flux_corr_mgm2day(ipts)-SedTrap.Carbon_flux_standard_error_corr_mgm2day(ipts)/2 ...
 		SedTrap.Carbon_flux_corr_mgm2day(ipts)+SedTrap.Carbon_flux_standard_error_corr_mgm2day(ipts)/2],...

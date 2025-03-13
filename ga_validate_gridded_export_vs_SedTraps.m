@@ -2,10 +2,13 @@ function ga_validate_gridded_export_vs_SedTraps
 
 
 %% GA_VALIDATE_GRIDDED_EXPORT_VS_SEDTRAPS: match gridded export product with the CCE-LTER sediment trap dataset
-% This function matches gridded GA products (K20 and GA) with the CCE-LTER dataset.
-% Outputs are compared against CCE_SedTrap_Data.csv (differences are due to precision in the csv file).
+% This function matches gridded export products (EF-OC and GA) with the CCE-LTER dataset, 
+% and reproduces Fig. 2b & c in Messié et al. (2025) as well as results from Table 1.
+% Outputs are compared against CCE_SedTrap_Data.csv.
 %
 % ga_validate_gridded_export_vs_SedTraps
+% 
+% Monique Messié, 2024
 	
 	
 
@@ -131,7 +134,7 @@ figure, set(gcf,'Units','Centimeters'); pos=get(gcf,'Position');
 	pos(3)=12; pos(4)=7; set(gcf,'Position',pos)
 	set(gcf,'PaperPositionMode','Auto','PaperUnits','Centimeters','PaperSize',[pos(3), pos(4)])
 	fontsize=7;
-axes('Position',[0.1 0.27 0.37 0.7],'FontSize',fontsize), hold on
+axes('Position',[0.08 0.27 0.4 0.7],'FontSize',fontsize), hold on
 	for ipts=find(iok)'
 		plot([SedTrap.Carbon_flux_corr_mgm2day(ipts) SedTrap.Carbon_flux_corr_mgm2day(ipts)],...
 		[SedTrap.export_EFOC_mgm2day(ipts) SedTrap.GAgridded_CZeu_mgm2day(ipts)],'Color',[0.7 0.7 0.7])
@@ -142,7 +145,7 @@ axes('Position',[0.1 0.27 0.37 0.7],'FontSize',fontsize), hold on
 	plot(xlim,xlim,'k')
 	xlabel({'{\it In situ} Zeu export [mg m^{-2} d^{-1}]'}), ylabel('Gridded export products [mg m^{-2} d^{-1}]')
 	legend([h1,h2],{'EF-OC','GA C_{Zeu}'},'FontSize',fontsize,'Location','northwest')
-axes('Position',[0.6 0.27 0.37 0.7],'FontSize',fontsize), hold on
+axes('Position',[0.58 0.27 0.4 0.7],'FontSize',fontsize), hold on
 	ibelow30m=SedTrap.Zeu_m>=30;
 	errSat=abs(SedTrap.export_EFOC_mgm2day*b(1)-SedTrap.GAgridded_CZeu_mgm2day*b(2))*sqrt(2);
 	for ipts=find(iok)'
@@ -160,7 +163,7 @@ axes('Position',[0.6 0.27 0.37 0.7],'FontSize',fontsize), hold on
 	plot(xlim,xlim,'k')
 	xlabel('{\it In situ} Zeu export [mgC m^{-2} d^{-1}]'), ylabel('Combined satellite export [mgC m^{-2} d^{-1}]')
 	hbar4=colorbar('SouthOutside'); hbar4.Title.String='Drift [km]';
-	hbar4.Position=[0.6 0.06 0.37 0.03];
+	hbar4.Position=[0.58 0.06 0.4 0.03];
 print('-djpeg','-r300','figures/Fig2bc.jpg')
 
 
